@@ -43,7 +43,7 @@ public class ImageService implements ImageServiceInt{
     }
 
     @Override
-    public List<ImageDto> saveImage(List<MultipartFile> files, Long productId) throws ProductNotFound {
+    public List<ImageDto> saveImage(List<MultipartFile> files, Long productId) throws ResourceNotFound {
         Product product = productService.getProductById(productId);
         List<ImageDto> savedImageDto = new ArrayList<>();
         for(MultipartFile file: files) {

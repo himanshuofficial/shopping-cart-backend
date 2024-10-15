@@ -12,7 +12,7 @@ import java.util.List;
 public interface ImageServiceInt {
     Image getImageById(Long id) throws ResourceNotFound;
     void deleteImageById(Long id);
-    List<ImageDto> saveImage(List<MultipartFile> file, Long productId) throws ProductNotFound;
+    List<ImageDto> saveImage(List<MultipartFile> file, Long productId) throws ProductNotFound, ResourceNotFound;
     void updateImage(MultipartFile file, Long imageId) throws ResourceNotFound;
 
 

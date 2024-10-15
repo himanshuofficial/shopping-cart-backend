@@ -1,13 +1,19 @@
 package com.shopping.himanshu.service.product;
 
+import com.shopping.himanshu.dto.ImageDto;
+import com.shopping.himanshu.dto.ProductDto;
 import com.shopping.himanshu.exceptions.ProductNotFound;
+import com.shopping.himanshu.exceptions.ResourceNotFound;
 import com.shopping.himanshu.model.Category;
+import com.shopping.himanshu.model.Image;
 import com.shopping.himanshu.model.Product;
 import com.shopping.himanshu.repository.CategoryRepository;
+import com.shopping.himanshu.repository.ImageRepository;
 import com.shopping.himanshu.repository.ProductRepository;
 import com.shopping.himanshu.request.AddProductRequest;
 import com.shopping.himanshu.request.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +25,9 @@ public class ProductService implements ProductServiceInt {
 
 //    @Autowired
     private final ProductRepository productRepo; // if we add final requiredargsconstrocutor will autowire the stuff
-
+    private final ImageRepository imageRepo;
     private final CategoryRepository categoryRepo;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<Product> listAllProducts() {
@@ -44,16 +51,6 @@ public class ProductService implements ProductServiceInt {
 
     @Override
     public Product addProduct(AddProductRequest request) {
-        // check if category is found in the DB
-        // if yes set it as the new product category otherwise then save it
-        // as a new category
-        // then set it as category and sace product
-//        Category category = Optional.ofNullable(categoryRepo.findByName(request.getCategory().getName()))
-//                .orElseGet(() -> {
-//                    Category newCategory = new Category(request.getCategory().getName());
-//                    return categoryRepo.save(newCategory);
-//                });
-//        request.setCategory(category)
         Category category = Optional.ofNullable(categoryRepo.findByName(request.getCategory().getName())).orElseGet(() ->
                 {
                     Category newCategory = new Category(request.getCategory().getName());
@@ -70,19 +67,15 @@ public class ProductService implements ProductServiceInt {
                 request.getPrice(),
                 request.getInventory(),
                 request.getDescription(),
-                request.getInventory(),
                 category
         );
     }
     @Override
-    public Product getProductById(Long id) throws ProductNotFound {
+    public Product getProductById(Long id) throws ResourceNotFound {
         return productRepo.findById(id)
-                .orElseThrow(() -> new ProductNotFound("Product not found"));
+                .orElseThrow(() -> new ResourceNotFound("Product not found"));
     }
 
-//    private Product UpdateExisitingProduct(Product existingProduct, ProductUpdateRequest request) {
-//        existingProduct.setName(request.getName());
-//    }
 
     @Override
     public void deleteProductById(Long id) {
@@ -97,13 +90,11 @@ public class ProductService implements ProductServiceInt {
     }
 
     @Override
-    public Product updateProduct(ProductUpdateRequest request, Long productId) throws ProductNotFound {
+    public Product updateProduct(ProductUpdateRequest request, Long productId) throws ResourceNotFound {
         return productRepo.findById(productId)
                 .map(existingProduct -> updateExistingProduct(existingProduct, request))
                 .map(productRepo :: save)
-                .orElseThrow(() -> new ProductNotFound("Product not found"));
-
-//        Product product = productRepo.findById(productId);
+                .orElseThrow(() -> new ResourceNotFound("Product not found"));
 
     }
 
@@ -117,5 +108,21 @@ public class ProductService implements ProductServiceInt {
         Category category = categoryRepo.findByName(request.getCategory().getName());
         existingProduct.setCategory(category);
         return existingProduct;
+    }
+
+    @Override
+    public List<ProductDto> getConvertedProducts(List<Product> products) {
+        return products.stream().map(this::convertToDto).toList();
+    }
+
+    @Override
+    public ProductDto convertToDto(Product product) {
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        List<Image> images = imageRepo.findByProductId(product.getId());
+        List<ImageDto> imageDtos = images.stream()
+                .map((image) -> modelMapper.map(image, ImageDto.class))
+                .toList();
+        productDto.setImages(imageDtos);
+        return productDto;
     }
 }
