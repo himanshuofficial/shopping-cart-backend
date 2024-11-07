@@ -2,7 +2,6 @@ package com.shopping.himanshu.service.cart;
 
 import com.shopping.himanshu.exceptions.ResourceNotFound;
 import com.shopping.himanshu.model.Cart;
-import com.shopping.himanshu.model.CartItem;
 
 import java.math.BigDecimal;
 
@@ -13,4 +12,6 @@ public interface CartInt {
 
 
     Long initializeNewCart();
+
+    Cart getCartByUserId(Long userId);
 }

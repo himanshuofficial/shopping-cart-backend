@@ -54,7 +54,8 @@ public class ProductController {
     public ResponseEntity<ApiResponse> updateProduct(@RequestBody ProductUpdateRequest request, @PathVariable Long productId) {
         try {
             Product product = productService.updateProduct(request, productId);
-            return ResponseEntity.ok(new ApiResponse("Prooduct updated", product));
+            ProductDto productDto = productService.convertToDto(product);
+            return ResponseEntity.ok(new ApiResponse("Prooduct updated", productDto));
         } catch(ResourceNotFound e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
         }

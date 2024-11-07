@@ -7,6 +7,7 @@ import com.shopping.himanshu.repository.CartItemRepository;
 import com.shopping.himanshu.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,6 +30,7 @@ public class CartService implements CartInt {
         return cartRepo.save(cart);
     }
 
+    @Transactional
     @Override
     public void clearCart(Long id) throws ResourceNotFound {
         Cart cart = getCart(id);
@@ -49,5 +51,10 @@ public class CartService implements CartInt {
         Long newCartId = cartIdGenerator.incrementAndGet();
         newCart.setId(newCartId);
         return cartRepo.save(newCart).getId();
+    }
+
+    @Override
+    public Cart getCartByUserId(Long userId) {
+        return cartRepo.findByUserId(userId);
     }
 }
